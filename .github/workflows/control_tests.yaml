@@ -1,0 +1,22 @@
+name: Contrôle Qualité Python (Pytest + Flake8)
+on: push
+
+jobs:
+  qualite:
+    name: Vérification des tests et style PEP8
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+      - name: Configuration Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Installation des paquets
+        run: |
+          pip install pytest flake8
+      - name: Lancement des tests
+        run: |
+          pytest
+      - name: Vérification Flake8
+        uses: py-actions/flake8@v2
