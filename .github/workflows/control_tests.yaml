@@ -1,22 +1,52 @@
-name: Contrôle Qualité Python (Pytest + Flake8)
-on: push
+name: Python QA Control (Pytest + Flake8)
+
+on: 
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+env:
+  PYTHON_VERSION: "3.10"  # Variable d'environnement globale
 
 jobs:
-  qualite:
-    name: Vérification des tests et style PEP8
-    runs-on: ubuntu-latest
+  quality_check:
+    name: Run Python QA Checks
+    runs-on: ubuntu-latest  # Utilise la dernière version d'Ubuntu
+    
     steps:
-      - name: Checkout du code
+      # Étape 1: Récupération du code
+      - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Configuration Python
+        
+      # Étape 2: Configuration de Python
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
-      - name: Installation des paquets
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'  # Activation du cache pour pip
+          
+      # Étape 3: Installation des dépendances
+      - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install pytest flake8
-      - name: Lancement des tests
+          pip install -r requirements.txt  # Si vous avez un fichier requirements.txt
+          
+      # Étape 4: Exécution des tests
+      - name: Run pytest
         run: |
-          pytest
-      - name: Vérification Flake8
+          pytest --verbose --junitxml=test-results.xml  # Génère un rapport JUnit
+          
+      # Étape 5: Vérification PEP8 avec flake8
+      - name: Run flake8
         uses: py-actions/flake8@v2
+        with:
+          options: "--config=.flake8"  # Optionnel: fichier de configuration flake8
+          
+      # Optionnel: Upload des résultats des tests
+      - name: Upload test results
+        if: always()  # S'exécute même si les tests échouent
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: test-results.xml
