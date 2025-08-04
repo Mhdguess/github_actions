@@ -18,12 +18,15 @@ jobs:
           
       - name: Installation des paquets
         run: |
-          pip install pytest flake8
+          pip install pytest
+          pip install flake8
           
       - name: Lancement des tests
         run: |
           pytest
-          
+        run: |
+          flake8
+
       - name: Vérification Flake8
         uses: py-actions/flake8@v2
 
